@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ewatercycle-plugin"
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "Apache-2.0"
+keywords = []
+authors = [
+  { name = "Peter Kalverla", email = "p.kalverla@esciencecenter.nl" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.entry-points."ewatercycle.models"]
+ToyModel = "ewatercycle_plugin.toymodel:ToyModel"
+
+[project.urls]
+Documentation = "https://github.com/unknown/ewatercycle-plugin#readme"
+Issues = "https://github.com/unknown/ewatercycle-plugin/issues"
+Source = "https://github.com/unknown/ewatercycle-plugin"
+
+[tool.hatch.version]
+path = "src/ewatercycle_plugin/__init__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+]
