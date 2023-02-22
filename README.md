@@ -1,19 +1,17 @@
 # ewatercycle-plugin
 
-[![PyPI - Version](https://img.shields.io/pypi/v/ewatercycle-plugin.svg)](https://pypi.org/project/ewatercycle-plugin)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ewatercycle-plugin.svg)](https://pypi.org/project/ewatercycle-plugin)
-
------
-
-**Table of Contents**
-
-- [Installation](#installation)
-- [License](#license)
-
 ## Installation
 
+Install this package alongside your eWaterCycle installation
+
 ```console
-pip install ewatercycle-plugin
+pip install -e .
+```
+
+Then ToyModel becomes available as one of the eWaterCycle models
+
+```python
+from ewatercycle.models import ToyModel
 ```
 
 ## License
