@@ -1,41 +1,57 @@
-# Python empty model with BMI v2.0
+# Base container for eWaterCycle BMI models written in Python
 #
-# Start from scratch:
-# docker run --name test -d -i -t docker.io/condaforge/mambaforge /bin/sh
-# docker exec -it test bash
+# Activates a default conda base environment with micromamba. While it may not
+# always be necessary, many hydrological models may at some point want to
+# install conda dependencies, which can be a struggle. This image should provide
+# a good starting point.
 #
-# docker build -t  .
-# docker run --name test -d -i -t testimage /bin/sh
-# docker exec -it test bash
-#
-
-# Build with
-#
-#   docker build -t ewatercycle_defaultmodel-grpc4bmi .
+# For details on the base image, see
+# https://github.com/mamba-org/micromamba-docker
 #
 #
-# Run with
-
+# To build the image, run
+#
+#   docker build --tag defaultmodel-grpc4bmi:v0.0.1 .
+#
+# If you use podman, you may need to add `--format docker`
+#
+#   docker build --format docker --tag defaultmodel-grpc4bmi:v0.0.1 .
+#
+# To talk to the model from outside the container, use grpc4bmi client
+#
 #   from grpc4bmi.bmi_client_docker import BmiClientDocker
-#   model = BmiClientDocker('ewatercycle_defaultmodel:v1', work_dir='/tmp', delay=1)
+#   model = BmiClientDocker('defaultmodel-grpc4bmi:v0.0.1', work_dir='/tmp', delay=1)
+#
+# To debug the container, you can override the grpc4bmi command
+#
+#   docker run --tty --interactive defaultmodel-grpc4bmi:v0.0.1 bash
+#
+# This will spawn a new bash terminal running inside the docker container
 
-# See https://github.com/mamba-org/micromamba-docker for details on using this base image
 FROM mambaorg/micromamba:1.3.1
 
-# Install conda-dependencies
-RUN micromamba install -y -n base -c conda-forge python=3.10 esmvalcore && micromamba clean --all --yes
+
+# Install Python + additional conda-dependencies,
+# Here I added cartopy as an example
+RUN micromamba install -y -n base -c conda-forge python=3.10 cartopy && \
+    micromamba clean --all --yes
+
+
+# Make sure the conda environment is activated for the remaining build
+# instructions below
 ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python will not be found)
 
-# Install ewatercycle
-RUN pip install https://github.com/eWaterCycle/ewatercycle/archive/entrypoints.zip
 
-# # Install grpc4bmi  # TODO: ensure compatible with above ewatercycle
-# RUN pip install https://github.com/eWaterCycle/grpc4bmi/archive/refs/heads/latest-protobuf.zip
+# Install GRPC4BMI
+RUN pip install https://github.com/eWaterCycle/grpc4bmi/archive/refs/heads/latest-protobuf.zip
 
-# Install defaultmodel plugin
-COPY . /opt/ewatercycle_defaultmodel/
+
+# Install ewatercycle_defaultmodel.default_bmi
+# Note that the [plugin] dependencies (ewatercycle/emsvaltool) are not required
+COPY . /opt/ewatercycle_defaultmodel
 RUN pip install -e /opt/ewatercycle_defaultmodel/
 
-# Start GRPC4BMI server
-# Don't override micromamba's entrypoint as that activates conda
+
+# Default command should be to run GRPC4BMI server
+# Don't override micromamba's entrypoint as that activates conda!
 CMD run-bmi-server --name "ewatercycle_defaultmodel.default_bmi.DefaultBmi" --port 50051

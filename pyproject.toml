@@ -4,43 +4,29 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ewatercycle_defaultmodel"
-description = ''
-readme = "README.md"
-requires-python = ">=3.8"
+description = "Template project for starting a new eWaterCycle plugin"
 license = "Apache-2.0"
-keywords = []
+version = "0.0.1"
 authors = [
   { name = "Peter Kalverla", email = "p.kalverla@esciencecenter.nl" },
 ]
-classifiers = [
-  "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
-]
+
+# Include here only the dependencies for the BMI Model
+# This is used to run the BmiModel inside the container
 dependencies = [
   "bmipy",
-  "ewatercycle",
+  "numpy",
   "xarray",
 ]
-dynamic = ["version"]
 
+# Additional dependencies used with pip install .[plugin]
+[project.optional-dependencies]
+ewatercycle = [
+  "ewatercycle",
+  "pyyaml",
+  "cftime",
+]
+
+# This registers the plugin such that it is discoverable by eWaterCycle
 [project.entry-points."ewatercycle.models"]
 DefaultModel = "ewatercycle_defaultmodel.default_model:DefaultModel"
-
-[project.urls]
-Documentation = "https://github.com/unknown/ewatercycle-plugin#readme"
-Issues = "https://github.com/unknown/ewatercycle-plugin/issues"
-Source = "https://github.com/unknown/ewatercycle-plugin"
-
-[tool.hatch.version]
-path = "src/ewatercycle_defaultmodel/__init__.py"
-
-[tool.hatch.envs.default]
-dependencies = [
-  "pytest",
-]
