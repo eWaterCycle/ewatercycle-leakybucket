@@ -12,10 +12,11 @@ from cftime import num2date
 from ewatercycle.forcing import DefaultForcing
 from ewatercycle.models.abstract import AbstractModel
 
+from .default_bmi import DefaultBmi
+
 logger = logging.getLogger(__name__)
 
-
-class ToyModel(AbstractModel[DefaultForcing]):
+class DefaultModel(AbstractModel[DefaultForcing]):
     available_versions = ("latest", )
 
     def setup(self, cfg_dir: Optional[str] = None, **kwargs) -> Tuple[str, str]:  # type: ignore
@@ -25,7 +26,7 @@ class ToyModel(AbstractModel[DefaultForcing]):
         with open(config_file, 'w') as file:
             yaml.dump({k: v for k, v in self.parameters}, file)
 
-        self.bmi = ... # TODO
+        self.bmi = DefaultBmi()
         return str(config_file), str(work_dir)
 
     def get_value_as_xarray(self, name: str) -> xr.DataArray:

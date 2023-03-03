@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ewatercycle-plugin"
+name = "ewatercycle_defaultmodel"
 description = ''
 readme = "README.md"
 requires-python = ">=3.8"
@@ -22,11 +22,15 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "bmipy",
+  "ewatercycle",
+  "xarray",
+]
 dynamic = ["version"]
 
 [project.entry-points."ewatercycle.models"]
-ToyModel = "ewatercycle_plugin.toymodel:ToyModel"
+DefaultModel = "ewatercycle_defaultmodel.default_model:DefaultModel"
 
 [project.urls]
 Documentation = "https://github.com/unknown/ewatercycle-plugin#readme"
@@ -34,7 +38,7 @@ Issues = "https://github.com/unknown/ewatercycle-plugin/issues"
 Source = "https://github.com/unknown/ewatercycle-plugin"
 
 [tool.hatch.version]
-path = "src/ewatercycle_plugin/__init__.py"
+path = "src/ewatercycle_defaultmodel/__init__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
