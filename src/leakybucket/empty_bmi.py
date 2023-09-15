@@ -1,9 +1,10 @@
-from typing import Tuple
+# TODO: move to ewatercycle
 from bmipy import Bmi
+from typing import Tuple
 import numpy as np
 
 
-class DefaultBmi(Bmi):
+class EmptyBmi(Bmi):
     """Empty model wrapped in a BMI interface."""
 
     def initialize(self, config_file: str) -> None:
@@ -67,14 +68,14 @@ class DefaultBmi(Bmi):
     def get_time_step(self) -> float:
         raise NotImplementedError()
 
-    def get_value(self, name: str, dest: np.ndarray) -> np.ndarray:
+    def get_value(self, name: str) -> np.ndarray:
         raise NotImplementedError()
 
     def get_value_ptr(self, name: str) -> np.ndarray:
         raise NotImplementedError()
 
     def get_value_at_indices(
-        self, name: str, dest: np.ndarray, inds: np.ndarray
+        self, name: str, inds: np.ndarray
     ) -> np.ndarray:
         raise NotImplementedError()
 
@@ -97,7 +98,7 @@ class DefaultBmi(Bmi):
         raise NotImplementedError()
 
     # Uniform rectilinear
-    def get_grid_shape(self, grid: int, shape: np.ndarray) -> np.ndarray:
+    def get_grid_shape(self, grid: int) -> np.ndarray:
         raise NotImplementedError()
 
     def get_grid_spacing(self, grid: int, spacing: np.ndarray) -> np.ndarray:
@@ -107,13 +108,13 @@ class DefaultBmi(Bmi):
         raise NotImplementedError()
 
     # Non-uniform rectilinear, curvilinear
-    def get_grid_x(self, grid: int, x: np.ndarray) -> np.ndarray:
+    def get_grid_x(self, grid: int) -> np.ndarray:
         raise NotImplementedError()
 
-    def get_grid_y(self, grid: int, y: np.ndarray) -> np.ndarray:
+    def get_grid_y(self, grid: int) -> np.ndarray:
         raise NotImplementedError()
 
-    def get_grid_z(self, grid: int, z: np.ndarray) -> np.ndarray:
+    def get_grid_z(self, grid: int) -> np.ndarray:
         raise NotImplementedError()
 
     def get_grid_node_count(self, grid: int) -> int:
