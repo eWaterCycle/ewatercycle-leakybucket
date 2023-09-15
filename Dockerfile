@@ -43,15 +43,15 @@ ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python will not be found)
 
 
 # Install GRPC4BMI
-RUN pip install https://github.com/eWaterCycle/grpc4bmi/archive/refs/heads/latest-protobuf.zip
+RUN pip install grpc4bmi==0.4.0
 
 
-# Install ewatercycle_defaultmodel.default_bmi
+# Install leakybucket.leakybucket_bmi
 # Note that the [plugin] dependencies (ewatercycle/emsvaltool) are not required
-COPY . /opt/ewatercycle_defaultmodel
-RUN pip install -e /opt/ewatercycle_defaultmodel/
+COPY . /opt/leakybucket
+RUN pip install -e /opt/leakybucket/
 
 
 # Default command should be to run GRPC4BMI server
 # Don't override micromamba's entrypoint as that activates conda!
-CMD run-bmi-server --name "ewatercycle_defaultmodel.default_bmi.DefaultBmi" --port 50051
+CMD run-bmi-server --name "leakybucket.leakybucket_bmi.LeakyBucketLumpedBmi" --port 50051
