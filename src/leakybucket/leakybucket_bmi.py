@@ -1,10 +1,10 @@
 from typing import Any, Tuple
 import numpy as np
 from leakybucket import utils
-from leakybucket import empty_bmi
+from leakybucket.empty_bmi import EmptyBmi
 
 
-class LeakyBucketLumpedBmi(empty_bmi.EmptyBmi):
+class LeakyBucketBmi(EmptyBmi):
     """Demonstration of a minimal hydrological model.
 
     🌧️
@@ -65,12 +65,14 @@ class LeakyBucketLumpedBmi(empty_bmi.EmptyBmi):
     def get_component_name(self) -> str:
         return "leakybucket"
 
-    def get_value(self, var_name: str) -> np.ndarray:
+    def get_value(self, var_name: str, dest: np.ndarray) -> np.ndarray:
         match var_name:
             case "storage":
-                return np.array(self.storage)
+                dest[:] = np.array(self.storage)
+                return dest
             case "discharge":
-                return np.array(self.discharge / (self.timestep_size / 24 / 3600))
+                dest[:] = np.array(self.discharge / (self.timestep_size / 24 / 3600))
+                return dest
             case _:
                 raise ValueError(f"Unknown variable {var_name}")
 
@@ -93,69 +95,67 @@ class LeakyBucketLumpedBmi(empty_bmi.EmptyBmi):
     # The BMI has to have some time-related functionality:
     def get_start_time(self) -> float:
         """Return end time in seconds since 1 january 1970."""
-        return get_unixtime(self.time_data.isel(time=0).values)
+        return get_unixtime(self.time_data.isel(time=0).values) # type: ignore
 
     def get_end_time(self) -> float:
         """Return end time in seconds since 1 january 1970."""
-        return get_unixtime(self.time_data.isel(time=-1).values)
+        return get_unixtime(self.time_data.isel(time=-1).values) # type: ignore
 
     def get_current_time(self) -> float:
         """Return current time in seconds since 1 january 1970."""
-        return get_unixtime(self.time_data.isel(time=self.current_timestep).values)
+        return get_unixtime(
+            self.time_data.isel(time=self.current_timestep).values # type: ignore
+        )
 
     def get_time_step(self) -> float:
         return self.timestep_size
 
     # Some BMI required grid-related methods.
     def get_grid_type(self, grid: int) -> str:
-        if grid == 0:
-            return "scalar"
-        else:
-            raise ValueError("Unknown grid number.")
+        return "rectilinear"
 
     def get_grid_rank(self, grid: int) -> int:
-        if grid == 0:
-            return 0
-        else:
-            raise ValueError("Unknown grid number.")
+        return 2
 
-    def get_grid_shape(self, grid: int) -> np.ndarray:
-        if grid == 0:
-            return np.array(1)
-        else:
-            raise ValueError("Unknown grid number.")
+    def get_grid_shape(self, grid: int, shape: np.ndarray) -> np.ndarray:
+        shape[:] = np.array([1,1], dtype="int64")
+        return shape
 
-    def get_grid_x(self, grid: int) -> np.ndarray:
-        if grid == 0:
-            return self.precipitation["lon"].to_numpy()
-        else:
-            raise ValueError("Unknown grid number.")
+    def get_grid_size(self, grid: int) -> int:
+        return np.array([1,], dtype="int64")
+    
+    def get_grid_spacing(self, grid: int, spacing: np.ndarray) -> np.ndarray:
+        spacing[:] = np.array([0., 0.])
+        return spacing
+    
+    def get_grid_origin(self, grid: int, origin: np.ndarray) -> np.ndarray:
+        origin[:] = np.array([0., 0.])
+        return origin
 
-    def get_grid_y(self, grid: int) -> np.ndarray:
-        if grid == 0:
-            return self.precipitation["lat"].to_numpy()
-        else:
-            raise ValueError("Unknown grid number.")
-
+    def get_grid_x(self, grid: int, x: np.ndarray) -> np.ndarray:
+        x[:] = self.precipitation["lon"].to_numpy()
+        return x
+        
+    def get_grid_y(self, grid: int, y: np.ndarray) -> np.ndarray:
+        y[:] = self.precipitation["lat"].to_numpy()
+        return y
+        
     def get_output_var_names(self) -> Tuple[str]:
         return ("discharge",)
 
     def get_time_units(self) -> str:
-        return "s"
+        return "seconds since 1970-01-01 00:00:00.0 +0000"
 
-    def get_value_at_indices(self, name: str, inds: np.ndarray) -> np.ndarray:
-        if inds == np.array(0):
-            return self.get_value(name)
-        else:
-            raise ValueError("Index out of bounds.")
+    def get_value_at_indices(
+        self, name: str, dest: np.ndarray, inds: np.ndarray
+    ) -> np.ndarray:
+        dest[:] = self.get_value(name, dest)
+        return dest
 
     def set_value_at_indices(
         self, name: str, inds: np.ndarray, src: np.ndarray
     ) -> None:
-        if inds == np.array(0):
-            self.set_value(name, src)
-        else:
-            raise ValueError("Index out of bounds.")
+        self.set_value(name, src)
 
     def get_var_grid(self, name: str) -> int:
         return 0
