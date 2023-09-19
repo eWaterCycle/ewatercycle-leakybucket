@@ -17,6 +17,7 @@ dependencies = [
   "bmipy",
   "numpy",
   "xarray",
+  "netcdf4",
 ]
 
 # Additional dependencies used with pip install .[plugin]
@@ -29,4 +30,4 @@ plugin = [
 
 # This registers the plugin such that it is discoverable by eWaterCycle
 [project.entry-points."ewatercycle.models"]
-LeakyBucket = "leakybucket.ewatercycle_models:ContainerLeakyBucket"
+LeakyBucket = "leakybucket.ewatercycle_models:LeakyBucket"
