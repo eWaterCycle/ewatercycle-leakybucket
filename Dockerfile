@@ -11,20 +11,20 @@
 #
 # To build the image, run
 #
-#   docker build --tag defaultmodel-grpc4bmi:v0.0.1 .
+#   docker build --tag leakybucket-grpc4bmi:v0.0.1 .
 #
 # If you use podman, you may need to add `--format docker`
 #
-#   docker build --format docker --tag defaultmodel-grpc4bmi:v0.0.1 .
+#   docker build --format docker --tag leakybucket-grpc4bmi:v0.0.1 .
 #
 # To talk to the model from outside the container, use grpc4bmi client
 #
 #   from grpc4bmi.bmi_client_docker import BmiClientDocker
-#   model = BmiClientDocker('defaultmodel-grpc4bmi:v0.0.1', work_dir='/tmp', delay=1)
+#   model = BmiClientDocker('leakybucket-grpc4bmi:v0.0.1', work_dir='/tmp', delay=1)
 #
 # To debug the container, you can override the grpc4bmi command
 #
-#   docker run --tty --interactive defaultmodel-grpc4bmi:v0.0.1 bash
+#   docker run --tty --interactive leakybucket-grpc4bmi:v0.0.1 bash
 #
 # This will spawn a new bash terminal running inside the docker container
 
@@ -54,4 +54,4 @@ RUN pip install -e /opt/leakybucket/
 
 # Default command should be to run GRPC4BMI server
 # Don't override micromamba's entrypoint as that activates conda!
-CMD run-bmi-server --name "leakybucket.leakybucket_bmi.LeakyBucketLumpedBmi" --port 50051
+CMD run-bmi-server --name "leakybucket.leakybucket_bmi.LeakyBucketBmi" --port 55555 --debug
