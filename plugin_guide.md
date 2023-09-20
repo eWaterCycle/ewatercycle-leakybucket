@@ -3,10 +3,10 @@
 
 The following steps are outlined in this guide:
 
-1. Creating a Basic Model Interface (BMI) for your model.
-2. Wrapping your model's BMI in an eWaterCycle "LocalModel".
-3. Accessing your model's BMI through grpc4bmi.
-4. Creating a docker container for your grpc4bmi model, and adding it to eWaterCycle.
+1. Implementing the Basic Model Interface
+2. Wrapping your BMI in the eWaterCycle interface
+3. Accessing your model through grpc4bmi
+4. Put your model in a container and add it to eWaterCycle 📦
 
 ## 1. Implementing the Basic Model Interface
 For eWaterCycle a model requires a [Basic Model Interface](https://bmi.readthedocs.io/en/stable/). Here there are two options:
@@ -23,7 +23,7 @@ For distributed models, a `GenericDistributedForcing` class is available.
 
 To implement your model, modify the BMI to incorporate the processes you want to add or change.
 
-[Notebook 01](01_raw_bmi.ipynb) is available to showcase the BMI, and can be used to test things while developing your plugin.
+[Notebook 01](notebooks/01_raw_bmi.ipynb) is available to showcase the BMI, and can be used to test things while developing your plugin.
 
 ### 1B Existing Model
 
@@ -71,7 +71,7 @@ class LocalBmiMyPlugin(LocalModel, MyPluginMixins):
 The LeakyBucket implementation can be found in `src/leakybucket/ewatercycle_models.py`.
 This is a good starting point to build upon.
 
-[Notebook 02](02_ewatercycle_local_model.ipynb) is available to try the LeakyBucket local model, and can be used to test things while developing your plugin.
+[Notebook 02](notebooks/02_ewatercycle_local_model.ipynb) is available to try the LeakyBucket local model, and can be used to test things while developing your plugin.
 
 ## 3. Accessing your model through grpc4bmi
 In eWaterCycle we want to run models in containers.
@@ -94,7 +94,7 @@ name: "mymodel"
 ```
 \* (if `MyModelBmi.get_component_name` is available before initialization).
 
-This is demonstrated in [notebook 03](03_local_grpc4bmi.ipynb).
+This is demonstrated in [notebook 03](notebooks/03_local_grpc4bmi.ipynb).
 
 If nothing went wrong, runnign the following command in your terminal (with the eWaterCycle environment active) will start the grpc4bmi server:
 
@@ -102,7 +102,9 @@ If nothing went wrong, runnign the following command in your terminal (with the 
 run-bmi-server --name "mymodel.bmi.MyModelBmi" --port 55555 --debug
 ```
 
-## 4. Putting your model in a container
+## 4. Put your model in a container and add it to eWaterCycle 📦
+
+### Containerizing your model
 To be able to share your model, and have it work as an easily installable ewatercycle plugin, you need to create a container for your model.
 
 A `Dockerfile` is available in this repository for the LeakyBucket model, and can be modified to fit your own model. Note that [Docker](https://www.docker.com/) is required for this.
@@ -129,3 +131,54 @@ class LocalContainerLeakyBucket(ContainerizedModel, LeakyBucketMixins):
     bmi_image: ContainerImage = ContainerImage("leakybucket")
 ```
 
+The LocalContainerLeakyBucket model is demonstrated in [notebook 04](notebooks/04_containerized_model.ipynb)
+
+### Sharing the container using a registry
+
+To allow others to use the containerized model, the container has to be uploaded to a registry.
+One such registry is the Github container registry (ghcr).
+
+To see how to get an access token and upload to the ghcr, see [their guide](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+
+The leaky bucket image has been pushed to `ghcr.io/ewatercycle/leakybucket`, with a tag corresponding to the current version of this repository.
+
+Instead of using the local container name, the `ContainerImage` class is given the `ghcr.io` location:
+
+```py
+class LeakyBucket(ContainerizedModel, LeakyBucketMixins):
+    """The LeakyBucket eWaterCycle model, with the Container Registry docker image."""
+    bmi_image: ContainerImage = ContainerImage(
+        "ghcr.io/ewatercycle/leakybucket:0.0.1"
+    )
+```
+
+### Register the model as eWaterCycle model entrypoint (plugin)
+
+Finally, the model can be registered as a plugin so that eWaterCycle can find it.
+This is done in the `pyproject.toml` file:
+
+```toml
+# This registers the plugin such that it is discoverable by eWaterCycle
+[project.entry-points."ewatercycle.models"]
+LeakyBucket = "leakybucket.ewatercycle_models:LeakyBucket"
+```
+
+Here you would replace the leaky bucket names with the correct model and class name of your own model.
+
+Now you can do:
+
+```py
+from ewatercycle.models import LeakyBucket
+```
+
+And run the model in eWaterCycle! 🚀
+
+For a working example, see [notebook 05](notebooks/05_finished_ewatercycle_plugin.ipynb)
+
+## Further steps
+
+After finishing the previous steps, you can upload the finished package to pypi.org.
+This will allow others to install it into their eWaterCycle installation using (for example):
+```sh
+pip install ewatercycle-mymodel
+```
