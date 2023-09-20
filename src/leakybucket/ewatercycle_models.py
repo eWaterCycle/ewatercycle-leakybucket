@@ -50,5 +50,5 @@ class LocalContainerLeakyBucket(ContainerizedModel, LeakyBucketMixins):
 class LeakyBucket(ContainerizedModel, LeakyBucketMixins):
     """The LeakyBucket eWaterCycle model, with the Container Registry docker image."""
     bmi_image: ContainerImage = ContainerImage(
-        "ghcr.io/ewatercycle/leakybucket"
+        "ghcr.io/ewatercycle/leakybucket:0.0.1"
     )

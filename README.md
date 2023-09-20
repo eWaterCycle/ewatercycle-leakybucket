@@ -23,7 +23,7 @@ from ewatercycle.models import LeakyBucket
 
 ## Implementing your own model
 
-For more information on implementing your own model see the [plugin guide](plugin_guide.md)
+For more information on how this plugin works, and on how to implement your own model see the [plugin guide](plugin_guide.md)
 
 ## License
 
