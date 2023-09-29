@@ -1,53 +1,44 @@
+# Add your model to eWaterCycle
 
-# Plugin Guide
+To add a model to eWaterCycle, you will need to start with a model that has the Basic Model Interface implemented.
+For an example of that, there is the (Python) [leakybucket-bmi](https://github.com/eWaterCycle/leakybucket-bmi).
 
-The following steps are outlined in this guide:
+Next you have to follow these steps:
 
-1. Implementing the Basic Model Interface
-2. Wrapping your BMI in the eWaterCycle interface
-3. Accessing your model through grpc4bmi
-4. Put your model in a container and add it to eWaterCycle 📦
+1. Package your model in a container with grpc4bmi
+2. Wrap your model in the eWaterCycle interface 
+3. Register your model as an eWaterCycle plugin
+4. Put your plugin on PyPI
 
-## 1. Implementing the Basic Model Interface
-For eWaterCycle a model requires a [Basic Model Interface](https://bmi.readthedocs.io/en/stable/). Here there are two options:
+## Container with grpc4bmi
+In eWaterCycle models are stored in (Docker) container images, which can be shared through the Github Container Registry or DockerHub.
 
-  - You want to add an existing model with a BMI to eWaterCycle
-  - You want to develop a completely new model
+Besides the model code, the container image should install the grpc4bmi server as an entrypoint to enable communication with the model from outside of the container.
+We use standardized image names including a unique version number for the model.
 
-### 1A New Model
-The file `src/leakybucket/leakybucket_bmi.py` holds the implemented BMI for the "leaky bucket" model.
-This model is a lumped hydrological model, with just a single "bucket" for the entire catchment, to simplify this example.
+Concretely, these are the steps you should follow:
+ - Create Docker container image named `ewatercycle/<model>-grpc4bmi:<version>` with grpc4bmi server running as entrypoint. For detailed instructions and examples, please see the [grpc4bmi docs](https://grpc4bmi.readthedocs.io/en/latest/container/building.html).
+ - Host Docker container image on the [Github registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
 
-Forcing is generated using the eWaterCycle, in this case the `GenericLumpedForcing` generator. 
-For distributed models, a `GenericDistributedForcing` class is available.
+Again, for an example see the [leakybucket-bmi](https://github.com/eWaterCycle/leakybucket-bmi) repository, which includes a Dockerfile.
 
-To implement your model, modify the BMI to incorporate the processes you want to add or change.
+> Note: if you have a Python BMI, you can use the model without a container for testing purposes, more info is available [down below](#local-python-model-no-container).
 
-[Notebook 01](notebooks/01_raw_bmi.ipynb) is available to showcase the BMI, and can be used to test things while developing your plugin.
+## Wrapping your model in the eWaterCycle interface
 
-### 1B Existing Model
-
-If you already have a model with a BMI, you will either need to create an eWaterCycle forcing class, or make your model compatible with the eWaterCycle generic forcing.
-
-Examples are available in the eWaterCycle repository under:
-
-`ewatercycle/src/ewatercycle/plugins/*model_name*/forcing.py`
-
-## 2. Wrapping your BMI in the eWaterCycle interface
 To be able to interface your model in eWaterCycle, you need to wrap it in an eWaterCycle model class.
+This model class will have to handle the forcing and/or parameter set input, as well as the model configuration file.
 
-For local debugging, this can be the `LocalModel`. This will be stuctured like the following:
+It is stuctured like the following:
 
 ```py
-from ewatercycle.base.model import LocalModel, eWaterCycleModel
-from mymodel.bmi import MyModelBmi
-from bmipy import Bmi
+from ewatercycle.base.model import ContainerizedModel, eWaterCycleModel
 
-# This "mix-in" class implements the eWaterCycle interface, and can be reused.
-class MyPluginMixins(eWaterCycleModel):
-    forcing: GenericLumpedForcing  # Models (almost) always require forcing.
+# This "methods" class implements the eWaterCycle interface, and can be reused.
+class MyPluginMethods(eWaterCycleModel):
+    forcing: GenericLumpedForcing  # Models usually require forcing.
 
-    parameter_set: ParameterSet  # If the model has a parameter set (e.g. routing).
+    parameter_set: ParameterSet  # If the model has a parameter set
 
     _config: dict = {  # _config holds model configuration settings:
         "forcing_file": "",
@@ -63,97 +54,27 @@ class MyPluginMixins(eWaterCycleModel):
         """Write model configuration file."""
         ... # Write the config to a file to pass it to your model BMI.
 
-class LocalBmiMyPlugin(LocalModel, MyPluginMixins):
+class MyModel(ContainerizedModel, MyPluginMethods):
     # The local model uses a local BMI class
-    bmi_class: Type[Bmi] = MyModelBmi
-```
-
-The LeakyBucket implementation can be found in `src/leakybucket/ewatercycle_models.py`.
-This is a good starting point to build upon.
-
-[Notebook 02](notebooks/02_ewatercycle_local_model.ipynb) is available to try the LeakyBucket local model, and can be used to test things while developing your plugin.
-
-## 3. Accessing your model through grpc4bmi
-In eWaterCycle we want to run models in containers.
-To be able to communicate with the BMI inside the container, we need to use the [grpc4bmi](https://github.com/eWaterCycle/grpc4bmi) package.
-
-If everything was implemented correctly up to now, this should not be a problem.
-You can try the following snippet:
-
-```py
-from grpc4bmi.bmi_grpc_server import BmiServer
-from mymodel.bmi import MyModelBmi
-
-server = BmiServer(MyModelBmi(), debug=True)  # with debug it should 
-
-print(server.getComponentName(0,0))
-```
-should return*:
-```
-name: "mymodel"
-```
-\* (if `MyModelBmi.get_component_name` is available before initialization).
-
-This is demonstrated in [notebook 03](notebooks/03_local_grpc4bmi.ipynb).
-
-If nothing went wrong, runnign the following command in your terminal (with the eWaterCycle environment active) will start the grpc4bmi server:
-
-```sh
-run-bmi-server --name "mymodel.bmi.MyModelBmi" --port 55555 --debug
-```
-
-## 4. Put your model in a container and add it to eWaterCycle 📦
-
-### Containerizing your model
-To be able to share your model, and have it work as an easily installable ewatercycle plugin, you need to create a container for your model.
-
-A `Dockerfile` is available in this repository for the LeakyBucket model, and can be modified to fit your own model. Note that [Docker](https://www.docker.com/) is required for this.
-
-To build the container locally, do:
-
-```sh
-docker build . -t "leakybucket"
-```
-Where `-t "name"` sets the "tag". 
-
-To start the container do:
-
-```sh
-docker run leakybucket
-```
-
-This should start the container and print the GRPC server's port to the terminal.
-
-The container tag can then be used to create a (local) containerized model:
-
-```py
-class LocalContainerLeakyBucket(ContainerizedModel, LeakyBucketMixins):
-    bmi_image: ContainerImage = ContainerImage("leakybucket")
-```
-
-The LocalContainerLeakyBucket model is demonstrated in [notebook 04](notebooks/04_containerized_model.ipynb)
-
-### Sharing the container using a registry
-
-To allow others to use the containerized model, the container has to be uploaded to a registry.
-One such registry is the Github container registry (ghcr).
-
-To see how to get an access token and upload to the ghcr, see [their guide](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
-
-The leaky bucket image has been pushed to `ghcr.io/ewatercycle/leakybucket`, with a tag corresponding to the current version of this repository.
-
-Instead of using the local container name, the `ContainerImage` class is given the `ghcr.io` location:
-
-```py
-class LeakyBucket(ContainerizedModel, LeakyBucketMixins):
-    """The LeakyBucket eWaterCycle model, with the Container Registry docker image."""
     bmi_image: ContainerImage = ContainerImage(
-        "ghcr.io/ewatercycle/leakybucket:0.0.1"
+        "ghcr.io/organization/model:v0.0.1"
     )
 ```
 
-### Register the model as eWaterCycle model entrypoint (plugin)
+The LeakyBucket implementation can be found [here](src/ewatercycle_leakybucket/model.py).
+This is a good starting point to build upon.
 
+### eWaterCycle Forcing
+
+For generating and loading model forcing, eWaterCycle makes use of a Forcing class.
+When generating forcing, ESMValTool recipes are used. This allows for standardized and reproducible forcing.
+
+If you are making a new model, you can use the GenericForcing, which has a lumped and a gridded version available.
+
+Otherwise you will have to make your own custom forcing class. For more info on this, see the eWaterCycle documentation (**TODO: Add link to ewatercycle docs**).
+
+
+## eWaterCycle plugin entry-point:
 Finally, the model can be registered as a plugin so that eWaterCycle can find it.
 This is done in the `pyproject.toml` file:
 
@@ -173,12 +94,33 @@ from ewatercycle.models import LeakyBucket
 
 And run the model in eWaterCycle! 🚀
 
-For a working example, see [notebook 05](notebooks/05_finished_ewatercycle_plugin.ipynb)
 
-## Further steps
+## Putting your plugin on PyPI
 
-After finishing the previous steps, you can upload the finished package to pypi.org.
+After finishing the previous steps, you should upload the finished package to pypi.org.
 This will allow others to install it into their eWaterCycle installation using (for example):
 ```sh
 pip install ewatercycle-mymodel
 ```
+
+For information on packaging your project, see [the Python documentation](https://packaging.python.org/en/latest/tutorials/packaging-projects/).
+
+If you have developed a plugin for eWaterCycle, get your model listed on the [eWatercycle plugins page](https://ewatercycle.readthedocs.io/en/latest/plugins.html) by making a [Pull request](https://github.com/eWaterCycle/ewatercycle/edit/main/docs/plugins.rst).
+
+# Tips & tricks
+
+### Local Python model (no container)
+For testing purposes you can directly use a Python model's BMI in eWaterCycle.
+For this you need to combine the eWaterCycle class methods with the eWaterCycle LocalModel as such:
+
+```py
+from ewatercycle.base.model import LocalMode
+from leakybucket import LeakyBucketBmi
+from ewatercycle_leakybucket.model import LeakyBucketMethods
+
+class LocalModelLeakyBucket(LocalModel, LeakyBucketMethods):
+    """The LeakyBucket eWaterCycle model, with the local BMI."""
+    bmi_class: Type[Bmi] = LeakyBucketBmi
+```
+
+Where LeakyBucketBmi is your local model's BMI class.

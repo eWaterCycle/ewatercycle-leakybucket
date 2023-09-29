@@ -1,33 +1,36 @@
 import json
 from pathlib import Path
-from typing import Type
-from ewatercycle.base.model import LocalModel, ContainerizedModel, eWaterCycleModel
+from ewatercycle.base.model import ContainerizedModel, eWaterCycleModel
 from ewatercycle.base.forcing import GenericLumpedForcing
 from pydantic import model_validator
-from leakybucket import leakybucket_bmi
-from bmipy import Bmi
 from ewatercycle.container import ContainerImage
 
 
-class LeakyBucketMixins(eWaterCycleModel):
+class LeakyBucketMethods(eWaterCycleModel):
     """Common arguments and methods for the eWatercycle LeakyBucket model."""
     forcing: GenericLumpedForcing  # The model requires forcing.
 
     _config: dict = {
         "forcing_file": "",
+        "precipitation_file": "",
         "leakiness": 0.05,
     }
 
     @model_validator(mode="after")
     def _update_config(self):
         assert self.forcing.directory is not None
-        self._config["forcing_file"] = str(self.forcing.directory / self.forcing.pr)
+        self._config["precipitation_file"] = str(
+            self.forcing.directory / self.forcing.pr
+        )
+        self._config["temperature_file"] = str(
+            self.forcing.directory / self.forcing.tas
+        )
         return self
 
     def _make_cfg_file(self, **kwargs) -> Path:
         """Write model configuration file."""
-        if "leakiness" in kwargs:
-            self._config["leakiness"] = kwargs["leakiness"]
+        for kwarg in kwargs:  # Write any kwargs to the config.
+            self._config[kwarg] = kwargs[kwarg]
 
         config_file = self._cfg_dir / "leakybucket_config.json"
 
@@ -37,18 +40,8 @@ class LeakyBucketMixins(eWaterCycleModel):
         return config_file
 
 
-class LocalModelLeakyBucket(LocalModel, LeakyBucketMixins):
-    """The LeakyBucket eWaterCycle model, with the local BMI."""
-    bmi_class: Type[Bmi] = leakybucket_bmi.LeakyBucketBmi
-
-
-class LocalContainerLeakyBucket(ContainerizedModel, LeakyBucketMixins):
-    """The LeakyBucket eWaterCycle model, with the (local) container BMI & grpc4bmi."""
-    bmi_image: ContainerImage = ContainerImage("leakybucket")
-
-
-class LeakyBucket(ContainerizedModel, LeakyBucketMixins):
+class LeakyBucket(ContainerizedModel, LeakyBucketMethods):
     """The LeakyBucket eWaterCycle model, with the Container Registry docker image."""
     bmi_image: ContainerImage = ContainerImage(
-        "ghcr.io/ewatercycle/leakybucket:0.0.1"
+        "ghcr.io/ewatercycle/leakybucket-grpc4bmi:v0.0.1"
     )

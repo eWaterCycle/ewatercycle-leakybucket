@@ -2,12 +2,6 @@
 
 This repository is a template for adding models to eWatercycle, and will guide you through all required steps.
 
-**Note**: this repository is designed for Python (compatible) models.
-Model BMI's written in Julia or Matlab/Octave can interface though Python.
-
-Some information on model BMI's in C/C++ or R is available on [the grpc4bmi repository](https://github.com/eWaterCycle/grpc4bmi).
-
-
 ## Installation
 Install this package alongside your eWaterCycle installation
 
