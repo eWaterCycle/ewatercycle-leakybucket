@@ -27,6 +27,8 @@ Again, for an example see the [leakybucket-bmi](https://github.com/eWaterCycle/l
 ## Wrapping your model in the eWaterCycle interface
 
 To be able to interface your model in eWaterCycle, you need to wrap it in an eWaterCycle model class.
+The eWaterCycle wrapper adds some additional BMI utilities that are relevant for hydrological models, and it can also combine the 'bare' BMI model with forcing data and parameter sets. It is modelled after [PyMT](https://csdms.colorado.edu/wiki/PyMT), but additionally it can run BMI models inside containers.
+
 This model class will have to handle the forcing and/or parameter set input, as well as the model configuration file.
 
 It is stuctured like the following:
