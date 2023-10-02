@@ -26,8 +26,6 @@ class LeakyBucketMethods(eWaterCycleModel):
 
     def _make_cfg_file(self, **kwargs) -> Path:
         """Write model configuration file."""
-        assert self.forcing.directory is not None
-
         self._config["precipitation_file"] = str(
             self.forcing.directory / self.forcing.pr
         )
