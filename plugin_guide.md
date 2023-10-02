@@ -73,7 +73,7 @@ When generating forcing, ESMValTool recipes are used. This allows for standardiz
 
 If you are making a new model, you can use the GenericForcing, which has a lumped and a gridded version available.
 
-Otherwise you will have to make your own custom forcing class. For more info on this, see the eWaterCycle documentation (**TODO: Add link to ewatercycle docs**).
+Otherwise you will have to make your own custom forcing class. For more info on this, see [the eWaterCycle documentation on forcing.](https://ewatercycle.readthedocs.io/en/latest/user_guide.html#Forcing-data).
 
 
 ## eWaterCycle plugin entry-point:
