@@ -1,14 +1,18 @@
+"""eWaterCycle wrapper for the LeakyBucket model."""
 import json
+from collections.abc import ItemsView
 from pathlib import Path
-from ewatercycle.base.model import ContainerizedModel, eWaterCycleModel
+from typing import Any
+
 from ewatercycle.base.forcing import GenericLumpedForcing
-from pydantic import model_validator
+from ewatercycle.base.model import ContainerizedModel, eWaterCycleModel
 from ewatercycle.container import ContainerImage
 
 
 class LeakyBucketMethods(eWaterCycleModel):
     """Common arguments and methods for the eWatercycle LeakyBucket model."""
     forcing: GenericLumpedForcing  # The model requires forcing.
+    parameter_set: None  # The model has no parameter set.
 
     _config: dict = {
         "forcing_file": "",
@@ -16,19 +20,17 @@ class LeakyBucketMethods(eWaterCycleModel):
         "leakiness": 0.05,
     }
 
-    @model_validator(mode="after")
-    def _update_config(self):
+    def _make_cfg_file(self, **kwargs) -> Path:
+        """Write model configuration file."""
         assert self.forcing.directory is not None
+
         self._config["precipitation_file"] = str(
             self.forcing.directory / self.forcing.pr
         )
         self._config["temperature_file"] = str(
             self.forcing.directory / self.forcing.tas
         )
-        return self
 
-    def _make_cfg_file(self, **kwargs) -> Path:
-        """Write model configuration file."""
         for kwarg in kwargs:  # Write any kwargs to the config.
             self._config[kwarg] = kwargs[kwarg]
 
@@ -38,6 +40,10 @@ class LeakyBucketMethods(eWaterCycleModel):
             f.write(json.dumps(self._config, indent=4))
 
         return config_file
+
+    @property
+    def parameters(self) -> ItemsView[str, Any]:
+        return self._config.items()
 
 
 class LeakyBucket(ContainerizedModel, LeakyBucketMethods):
