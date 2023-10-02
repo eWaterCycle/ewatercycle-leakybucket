@@ -100,12 +100,12 @@ And run the model in eWaterCycle! 🚀
 ## Putting your plugin on PyPI
 
 After finishing the previous steps, you should upload the finished package to pypi.org.
+For information on packaging your project, see [the Python documentation](https://packaging.python.org/en/latest/tutorials/packaging-projects/).
+
 This will allow others to install it into their eWaterCycle installation using (for example):
 ```sh
 pip install ewatercycle-mymodel
 ```
-
-For information on packaging your project, see [the Python documentation](https://packaging.python.org/en/latest/tutorials/packaging-projects/).
 
 If you have developed a plugin for eWaterCycle, get your model listed on the [eWatercycle plugins page](https://ewatercycle.readthedocs.io/en/latest/plugins.html) by making a [Pull request](https://github.com/eWaterCycle/ewatercycle/edit/main/docs/plugins.rst).
 
