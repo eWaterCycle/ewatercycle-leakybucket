@@ -10,7 +10,11 @@ from ewatercycle.container import ContainerImage
 
 
 class LeakyBucketMethods(eWaterCycleModel):
-    """Common arguments and methods for the eWatercycle LeakyBucket model."""
+    """The eWatercycle LeakyBucket model.
+    
+    Setup args:
+        leakiness: The "leakiness" of the bucket in [d-1].
+    """
     forcing: GenericLumpedForcing  # The model requires forcing.
     parameter_set: None  # The model has no parameter set.
 
