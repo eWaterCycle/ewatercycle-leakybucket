@@ -83,7 +83,7 @@ This is done in the `pyproject.toml` file:
 ```toml
 # This registers the plugin such that it is discoverable by eWaterCycle
 [project.entry-points."ewatercycle.models"]
-LeakyBucket = "leakybucket.ewatercycle_models:LeakyBucket"
+MyModel = "mymodel.ewatercycle_model:MyModel"
 ```
 
 Here you would replace the leaky bucket names with the correct model and class name of your own model.
@@ -91,7 +91,7 @@ Here you would replace the leaky bucket names with the correct model and class n
 Now you can do:
 
 ```py
-from ewatercycle.models import LeakyBucket
+from ewatercycle.models import MyModel
 ```
 
 And run the model in eWaterCycle! 🚀
