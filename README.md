@@ -8,7 +8,7 @@ To use the template, press the green "Use this template" button on GitHub, and r
 Install this package alongside your eWaterCycle installation
 
 ```console
-pip install -e .
+pip install ewatercycle-leakybucket
 ```
 
 Then LeakyBucket becomes available as one of the eWaterCycle models
