@@ -1,17 +1,39 @@
 # Add your model to eWaterCycle
 
-To add a model to eWaterCycle, you will need to start with a model that has the
-Basic Model Interface implemented. For an example of that, there is the (Python)
-[leakybucket-bmi](https://github.com/eWaterCycle/leakybucket-bmi).
+This document describes the steps to add a model plugin to eWaterCycle. For
+general information about adding models to eWaterCycle, see the [eWaterCycle
+documentation](https://ewatercycle.readthedocs.io/en/latest/adding_models.html)
 
-Next you have to follow these steps:
+## Prerequisites
 
-1. Package your model in a container with grpc4bmi
-2. Wrap your model in the eWaterCycle interface
-3. Register your model as an eWaterCycle plugin
-4. Put your plugin on PyPI
+You will need a model that:
 
-## Container with grpc4bmi
+- [exposes the Basic Model Interface](#basic-model-interface-bmi), and
+- (ideally) is [packaged in a (docker/apptainer) container with grpc4bmi](#container-with-grpc4bmi)
+
+### Basic Model Interface (BMI)
+
+The basic model interface is a set of standards that can be used to control
+simulation models such as used in many earth system model components. It is
+designed by CSDMS, and you can find more information on [their
+website](https://bmi.readthedocs.io/en/stable/).
+
+For example, (almost) every model has a main time loop, an initialization
+routine, and an update function. By standardizing these, we can easily combine
+or switch between different models:
+
+```py
+model.initialize()
+while model.time < model.end_time:
+    model.update()
+```
+
+The BMI is available in most languages used for earth system models. If you
+already have a model, you need to wrap it in the BMI interface. Otherwise, you
+can start from the simple leaky-bucket model that we've written especially for this
+purpose: [leakybucket-bmi](https://github.com/eWaterCycle/leakybucket-bmi)
+
+### Container with grpc4bmi
 
 In eWaterCycle models are stored in (Docker) container images, which can be
 shared through the Github Container Registry or DockerHub.
@@ -82,9 +104,30 @@ class MyModel(ContainerizedModel, MyPluginMethods):
     )
 ```
 
-The LeakyBucket implementation can be found
-[here](src/ewatercycle_leakybucket/model.py). This is a good starting point to
-build upon.
+As a starting point, you can use the ewatercycle-leakybucket plugin from this
+repo, following the steps outlined below.
+
+1. Create a new repo, by pressing the "use this template" button on
+   [ewatercycle-leakybucket
+   repo](https://github.com/eWaterCycle/ewatercycle-leakybucket) or following
+   [this
+   link](https://github.com/new?template_name=ewatercycle-leakybucket&template_owner=eWaterCycle)
+   In choosing a name for your plugin, please prepend `ewatercycle-`, e.g. for
+   our model called leakybucket we used `ewatercycle-leakybucket`.
+1. Replace all instances of "leakybucket"/"LeakyBucket" with your model name, including
+   - `git mv src/ewatercycle_leakybucket/ src/ewatercycle_mymodel`
+   - everything in `pyproject.toml`
+   - everything in `src/ewatercycle_mymodel/model.py`
+1. If necessary, update the version in `src/ewatercycle_mymodel/__init__.py`
+1. Remove this plugin guide from your copy of the repo: `git rm plugin_guide.md`
+1. Update the example in `src/ewatercycle_mymodel` to your needs
+1. Optional: [add forcing](#ewatercycle-forcing)
+1. [Register and install your plugin](#registering-your-plugin)
+1. [Update the readme and demo notebook](#update-readme-and-demo-notebook)
+1. [Make your plugin available on PyPI](#upload-to-pypi)
+1. [List your plugin on the eWaterCycle documentation](#listing-your-plugin-on-the-ewatercycle-documentation)
+1. [Make your plugin citeable](https://zenodo.org/account/settings/github/)
+1. Add tests and continuous integration
 
 ### eWaterCycle Forcing
 
@@ -95,15 +138,17 @@ standardized and reproducible forcing.
 If you are making a new model, you can use the GenericForcing, which has a
 lumped and a gridded version available.
 
-Otherwise you will have to make your own custom forcing class. For more info on
-this, see [the eWaterCycle documentation on
+If you are using an existing model that deviates from the standard forcing, you
+can make your own custom forcing class. For more info on this, see [the
+eWaterCycle documentation on
 forcing.](https://ewatercycle.readthedocs.io/en/latest/user_guide.html#Forcing-data).
 
+### Registering your plugin
 
-## eWaterCycle plugin entry-point
-
-Finally, the model can be registered as a plugin so that eWaterCycle can find
-it. This is done in the `pyproject.toml` file:
+eWaterCycle uses
+[entrypoints](https://packaging.python.org/en/latest/guides/creating-and-discovering-plugins/#using-package-metadata)
+to discover plugins installed in your environment. Making your plugin discoverable is done in the
+`pyproject.toml` file:
 
 ```toml
 # This registers the plugin such that it is discoverable by eWaterCycle
@@ -111,18 +156,27 @@ it. This is done in the `pyproject.toml` file:
 MyModel = "mymodel.ewatercycle_model:MyModel"
 ```
 
-Here you would replace the leaky bucket names with the correct model and class
+Here you should have replaced the leaky bucket names with the correct model and class
 name of your own model.
 
-Now you can do:
+After (re-)installing your model (`pip install -e .`), you should be able to import and run your model in eWaterCycle:
 
 ```py
 from ewatercycle.models import MyModel
 ```
 
-And run the model in eWaterCycle! 🚀
+Well done! 🚀
 
-## Putting your plugin on PyPI
+### Update readme and demo notebook
+
+To help potential users find and use your plugin, it is imperative to have an
+adequate readme and ship an example notebook with the repository that runs a
+simple example case.
+
+A working example notebook is a requirement for listing your plugin on the
+eWaterCycle documentation.
+
+### Upload to PyPI
 
 After finishing the previous steps, you should upload the finished package to
 pypi.org. For information on packaging your project, see [the Python
@@ -135,10 +189,12 @@ This will allow others to install it into their eWaterCycle installation using
 pip install ewatercycle-mymodel
 ```
 
-If you have developed a plugin for eWaterCycle, get your model listed on the
-[eWatercycle plugins
-page](https://ewatercycle.readthedocs.io/en/latest/plugins.html) by making a
-[Pull
+### Listing your plugin on the eWaterCycle documentation
+
+eWaterCycle maintains a list of endorsed plugins [in its
+documentation](https://ewatercycle.readthedocs.io/en/latest/plugins.html)
+
+To get your model listed, you can [open a pull
 request](https://github.com/eWaterCycle/ewatercycle/edit/main/docs/plugins.rst).
 
 ## Tips & tricks
