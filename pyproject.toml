@@ -10,7 +10,6 @@ name = "ewatercycle-leakybucket"
 description = "Template project for starting a new eWaterCycle plugin"
 readme = "README.md"
 license = "Apache-2.0"
-version = "0.0.1"
 authors = [
   { name = "Bart Schilperoort, Peter Kalverla, Stefan Verhoeven", email = "b.schilperoort@esciencecenter.nl" },
 ]
@@ -28,6 +27,7 @@ classifiers = [
 dependencies = [
   "ewatercycle",
 ]
+dynamic = ["version"]
 
 # This registers the plugin such that it is discoverable by eWaterCycle
 [project.entry-points."ewatercycle.models"]
