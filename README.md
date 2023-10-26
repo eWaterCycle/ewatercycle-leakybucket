@@ -5,6 +5,7 @@ This repository is a template for adding models to eWatercycle, and will guide y
 To use the template, press the green "Use this template" button on GitHub, and replace all instances of "leakybucket"/"LeakyBucket" with your model name.
 
 ## Installation
+
 Install this package alongside your eWaterCycle installation
 
 ```console
