@@ -118,9 +118,9 @@ repo, following the steps outlined below.
    - `git mv src/ewatercycle_leakybucket/ src/ewatercycle_mymodel`
    - everything in `pyproject.toml`
    - everything in `src/ewatercycle_mymodel/model.py`
-1. If necessary, update the version in `src/ewatercycle_mymodel/__init__.py`
+1. If necessary, update the version in `src/ewatercycle_mymodel/__init__.py`, for example when you want make the version of the plugin match the version of your model.
 1. Remove this plugin guide from your copy of the repo: `git rm plugin_guide.md`
-1. Update the example in `src/ewatercycle_mymodel` to your needs
+1. Update the code in `src/ewatercycle_mymodel` to your needs
 1. Optional: [add forcing](#ewatercycle-forcing)
 1. [Register and install your plugin](#registering-your-plugin)
 1. [Update the readme and demo notebook](#update-readme-and-demo-notebook)
@@ -175,6 +175,8 @@ simple example case.
 
 A working example notebook is a requirement for listing your plugin on the
 eWaterCycle documentation.
+
+You can use the [demo_containerized_model.ipynb](demo_containerized_model.ipynb) notebook as a starting point for a notebook that works with your model.
 
 ### Upload to PyPI
 
