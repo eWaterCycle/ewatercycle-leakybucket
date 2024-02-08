@@ -4,6 +4,19 @@ This document describes the steps to add a model plugin to eWaterCycle. For
 general information about adding models to eWaterCycle, see the [eWaterCycle
 documentation](https://ewatercycle.readthedocs.io/en/latest/adding_models.html)
 
+**Table of Contents**
+* [Prerequisites](#prerequisites)
+  + [Basic Model Interface (BMI)](#basic-model-interface-\(bmi\))
+  + [Container with grpc4bmi](#container-with-grpc4bmi)
+* [Wrapping your model in the eWaterCycle interface](#wrapping-your-model-in-the-ewatercycle-interface)
+  + [eWaterCycle Forcing](#ewatercycle-forcing)
+  + [Registering your plugin](#registering-your-plugin)
+  + [Update readme and demo notebook](#update-readme-and-demo-notebook)
+  + [Upload to PyPI](#upload-to-pypi)
+  + [Listing your plugin on the eWaterCycle documentation](#listing-your-plugin-on-the-ewatercycle-documentation)
+* [Tips and tricks](#tips-\&-tricks)
+  + [Local Python model (no container)](#local-python-model-\(no-container\))
+
 ## Prerequisites
 
 You will need a model that:
