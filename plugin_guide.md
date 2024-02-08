@@ -6,7 +6,7 @@ documentation](https://ewatercycle.readthedocs.io/en/latest/adding_models.html)
 
 **Table of Contents**
 * [Prerequisites](#prerequisites)
-  + [Basic Model Interface (BMI)](#basic-model-interface-\(bmi\))
+  + [Basic Model Interface](#basic-model-interface)
   + [Container with grpc4bmi](#container-with-grpc4bmi)
 * [Wrapping your model in the eWaterCycle interface](#wrapping-your-model-in-the-ewatercycle-interface)
   + [eWaterCycle Forcing](#ewatercycle-forcing)
@@ -14,8 +14,8 @@ documentation](https://ewatercycle.readthedocs.io/en/latest/adding_models.html)
   + [Update readme and demo notebook](#update-readme-and-demo-notebook)
   + [Upload to PyPI](#upload-to-pypi)
   + [Listing your plugin on the eWaterCycle documentation](#listing-your-plugin-on-the-ewatercycle-documentation)
-* [Tips and tricks](#tips-\&-tricks)
-  + [Local Python model (no container)](#local-python-model-\(no-container\))
+* [Tips and tricks](#tips-and-tricks)
+  + [Local Python model](#local-python-model)
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ You will need a model that:
 - [exposes the Basic Model Interface](#basic-model-interface-bmi), and
 - (ideally) is [packaged in a (docker/apptainer) container with grpc4bmi](#container-with-grpc4bmi)
 
-### Basic Model Interface (BMI)
+### Basic Model Interface
 
 The basic model interface is a set of standards that can be used to control
 simulation models such as used in many earth system model components. It is
@@ -212,9 +212,9 @@ documentation](https://ewatercycle.readthedocs.io/en/latest/plugins.html)
 To get your model listed, you can [open a pull
 request](https://github.com/eWaterCycle/ewatercycle/edit/main/docs/plugins.rst).
 
-## Tips & tricks
+## Tips and tricks
 
-### Local Python model (no container)
+### Local Python model
 
 For testing purposes you can directly use a Python model's BMI in eWaterCycle.
 For this you need to combine the eWaterCycle class methods with the eWaterCycle
