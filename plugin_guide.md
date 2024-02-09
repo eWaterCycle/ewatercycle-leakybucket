@@ -221,7 +221,7 @@ For this you need to combine the eWaterCycle class methods with the eWaterCycle
 LocalModel as such:
 
 ```py
-from ewatercycle.base.model import LocalMode
+from ewatercycle.base.model import LocalModel
 from leakybucket import LeakyBucketBmi
 from ewatercycle_leakybucket.model import LeakyBucketMethods
 
