@@ -26,12 +26,8 @@ class LeakyBucketMethods(eWaterCycleModel):
 
     def _make_cfg_file(self, **kwargs) -> Path:
         """Write model configuration file."""
-        self._config["precipitation_file"] = str(
-            self.forcing.directory / self.forcing.pr
-        )
-        self._config["temperature_file"] = str(
-            self.forcing.directory / self.forcing.tas
-        )
+        self._config["precipitation_file"] = str(self.forcing["pr"])
+        self._config["temperature_file"] = str(self.forcing["tas"])
 
         for kwarg in kwargs:  # Write any kwargs to the config.
             self._config[kwarg] = kwargs[kwarg]
